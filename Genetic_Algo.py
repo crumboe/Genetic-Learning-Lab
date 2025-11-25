@@ -155,7 +155,7 @@ class GeneticAlgorithm:
 
             population = np.array(new_population[:self.population_size])
             self.mutation_rate *=MUTATION_EFFECT_DECAY
-            self.mutation_effect *=MUTATION_EFFECT_DECAY
+            # self.mutation_effect *=MUTATION_EFFECT_DECAY
 
         fitness = self.evaluate_population(population, self.generations)
         best_idx = np.argmax(fitness)

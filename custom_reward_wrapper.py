@@ -94,15 +94,8 @@ class CustomRewardCartPole(gym.Wrapper):
                 energy_error = (-total_energy + target_energy)
                 pumping_direction =- np.sign(theta_dot * np.cos(theta))
                 state[2] = energy_error*pumping_direction
-                # if energy_error > 0: # if there isnt enough energy reward it towards to right number
                 energy_reward = 1.0 - min(abs(energy_error) / target_energy, 1.0)
-                # else: # if too much energy punish
-                #     energy_reward = -1-min(abs(energy_error) / target_energy, 1.0) 
-
-                # Small bonus for moving toward vertical
-
                 upright_progress = .5 - (angle_from_upright / np.pi)
-                
                 # Penalize cart moving too far from center
                 position_penalty = -0.1 * (x ** 2)
                 
@@ -123,43 +116,7 @@ class CustomRewardCartPole(gym.Wrapper):
                 custom_reward = 5.0 * angle_reward + 2.0 * stability_reward + position_reward + cart_velocity_penalty
                 custom_reward *= 2.0  # Scale up balance rewards
 
-        elif self.reward_type == "custom_15_deg":
-            # Custom reward function that gives a bonus for keeping the pole within 15 degrees
-            # and keeping the cart centered
-            
-            # Target: 15 degrees (convert to radians)
-            target_angle = np.deg2rad(15)
-            angle_degrees = abs(np.rad2deg(theta))
-            
-            # Angle reward: exponential falloff from target angle
-            # Peak reward when at exactly 15 degrees
-            angle_error = abs(abs(theta) - target_angle)
-            angle_reward = np.exp(-10 * angle_error**2)  # Sharp peak at 15 degrees
-            
-            # Stability reward: penalize angular velocity (want to hold steady)
-            stability_reward = np.exp(-5 * theta_dot**2)
-            
-            # Position reward: keep cart centered
-            # Exponential falloff from center position
-            position_reward = np.exp(-2 * x**2)
-            
-            # Cart velocity penalty: discourage excessive movement
-            velocity_penalty = np.exp(-0.5 * x_dot**2)
-            
-            # Combine all components with weights
-            # Prioritize angle (most important), then position, then stability
-            custom_reward = (
-                2.0 * angle_reward +       # Weight: 2.0 - most important
-                1.0 * position_reward +     # Weight: 1.0 - keep centered
-                0.5 * stability_reward +    # Weight: 0.5 - reduce oscillation
-                0.3 * velocity_penalty      # Weight: 0.3 - smooth movement
-            )
-            # dist_error_normalized = x / self.env.unwrapped.x_threshold
-            # angle_error_normalized = angle_error / np.deg2rad(FAILURE_ANGLE_DEGREES)
-            state[2] = target_angle-theta # for the PID controller
-            # Normalize to reasonable range (0 to ~4)
-            
-            # This helps the GA distinguish between good and bad solutions
+       
             
         else:
             custom_reward = reward
